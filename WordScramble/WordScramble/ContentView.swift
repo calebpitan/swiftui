@@ -21,22 +21,34 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                List {
-                    Section {
-                        TextField("Enter your word", text: $newWord)
-                            .textInputAutocapitalization(.never)
-                            .focused($textFieldIsFocused)
-                    }
-                    
-                    Section {
-                        ForEach(usedWords, id: \.self) { word in
-                            HStack {
-                                Image(systemName: "\(word.count).circle")
-                                Text(word)
+            // This can be really useful when using ScrollView with List, which
+            // I used at some point. I'm only keeping it for the sake of future
+            // references.
+            GeometryReader { gp in
+                let g = gp.frame(in: .named("viewport"))
+
+                VStack(spacing: 0) {
+                    List {
+                        Section {
+                            TextField("Enter your word", text: $newWord)
+                                .textInputAutocapitalization(.never)
+                                .focused($textFieldIsFocused)
+                        }
+
+                        Section {
+                            ForEach(usedWords, id: \.self) { word in
+                                HStack {
+                                    Image(systemName: "\(word.count).circle")
+                                    Text(word)
+                                }
                             }
                         }
                     }
+                }
+                .overlay(alignment: .bottom) {
+                    ScoreBoard(score: score)
+                        .shadow(color: Color.black.opacity(0.1), radius: 7)
+                        .safeAreaPadding(.bottom.union(.horizontal))
                 }
                 .navigationTitle(rootWord)
                 .toolbar {
@@ -49,21 +61,9 @@ struct ContentView: View {
                 } message: {
                     Text(errorMessage)
                 }
-                
-                ZStack(alignment: .top) {
-                    RadialGradient(colors: [.gray.opacity(0.35), .white], center: .bottom, startRadius: 10, endRadius: 400)
-                    VStack(spacing: 64) {
-                        Text("Score")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                        Text("\(score)")
-                            .font(.system(size: 64, weight: .bold))
-                    }
-                    .padding(.top, 48)
-                }
-                .ignoresSafeArea()
             }
         }
+        .coordinateSpace(.named("viewport"))
     }
 
     func addNewWord() {
@@ -71,7 +71,7 @@ struct ContentView: View {
 
         guard answer.count > 0 else { return }
 
-        guard answer.count > 3 else {
+        guard answer.count > 2 else {
             wordError(title: "Word too short", message: "Words must be at least 4 letters long")
             return
         }
