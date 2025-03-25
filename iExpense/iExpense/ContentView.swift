@@ -41,7 +41,7 @@ class Expense {
     ///   - by: The key to group the expense items by
     ///   - filter: The filter criteria for the expense items
     /// - Returns: A dictionary grouping of expense items, mapping a list of expense items to a unique grouping key
-    func grouped<K: Hashable>(by: (ExpenseItem) -> K, filter: ((ExpenseItem) -> Bool)?) -> Dictionary<K, [ExpenseItem]> {
+    func grouped<K: Hashable>(by: (ExpenseItem) -> K, where filter: ((ExpenseItem) -> Bool)?) -> Dictionary<K, [ExpenseItem]> {
         if let filter = filter {
             Dictionary(grouping: items.filter(filter), by: by)
         } else {
@@ -86,7 +86,7 @@ struct ContentView: View {
             $0.name.lowercased().contains(searchText.lowercased())
         }
 
-        return expenses.grouped(by: \.type, filter: filter)
+        return expenses.grouped(by: \.type, where: filter)
             .sorted(by: { $0.key < $1.key })
     }
 
